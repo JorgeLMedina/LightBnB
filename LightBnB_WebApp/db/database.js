@@ -94,7 +94,7 @@ const getAllReservations = function (guest_id, limit = 10) {
       WHERE reservations.guest_id = $1
       GROUP BY properties.id, reservations.id
       ORDER BY reservations.start_date
-      LIMIT $2;`, [guest_id], limit)
+      LIMIT $2;`, [guest_id, limit])
     .then((result) => {
       if (result.rows.length === 0) {
         return null;
@@ -129,28 +129,30 @@ const getAllProperties = (options, limit = 10) => {
   //////////////////////////////////////////////////////////
   // If 'city' is passed in
   //////////////////////////////////////////////////////////
-  const queryStringWhereArr = [];
+  // const queryStringWhereArr = [];
 
-  if (options.city) {
-    queryParams.push(`%${options.city}%`);
-    queryString += `WHERE city LIKE $${queryParams.length} `;
+
+
+  if (options.owner_id) {
+    queryParams.push(`%${options.owner_id}%`);
+    queryString += `WHERE owner_id = ${queryParams.length}`;
   }
 
-  if (options.minimum_price_per_night && options.maximum_price_per_night) {
+  if (options.minimum_price_per_night) {
     queryParams.push(`%${options.minimum_price_per_night}%`);
     if (queryParams.length === 0) {
-      queryString += `WHERE minimum_price_per_night >= ${queryParams.length}`;
+      queryString += `WHERE minimum_price_per_night >= ${queryParams.length * 100}`;
     } else {
-      queryString += `AND minimum_price_per_night >= ${queryParams.length}`
+      queryString += `AND minimum_price_per_night <= ${queryParams.length * 100}`
     }
   }
 
   if (options.maximum_price_per_night) {
     queryParams.push(`%${options.maximum_price_per_night}%`);
     if (queryParams.length === 0) {
-      queryString += `WHERE maximum_price_per_night <= ${queryParams.length}`;
+      queryString += `WHERE maximum_price_per_night <= ${queryParams.length * 100}`;
     } else {
-      queryString += `AND maximum_price_per_night <= ${queryParams.length}`
+      queryString += `AND maximum_price_per_night <= ${queryParams.length * 100}`
     }
   }
 
@@ -163,9 +165,18 @@ const getAllProperties = (options, limit = 10) => {
     }
   }
 
-  const queryStringWhereJoinedArr = queryStringWhereArr.join(' AND ');
+  if (options.city) {
+    queryParams.push(`%${options.city}%`);
+    if (queryParams.length === 0) {
+      queryString += `WHERE city LIKE $${queryParams.length} `;
+    } else {
+      queryString += `AND minimum_price_per_night >= ${queryParams.length}`;
+    }
+  }
 
-  queryString += queryStringWhereJoinedArr;
+  // const queryStringWhereJoinedArr = queryStringWhereArr.join(' AND ');
+
+  // queryString += queryStringWhereJoinedArr;
 
   queryParams.push(limit);
   queryString += `
@@ -193,10 +204,66 @@ const getAllProperties = (options, limit = 10) => {
  * @return {Promise<{}>} A promise to the property.
  */
 const addProperty = function (property) {
-  const propertyId = Object.keys(properties).length + 1;
-  property.id = propertyId;
-  properties[propertyId] = property;
-  return Promise.resolve(property);
+  const propertyValues = [];
+
+  for (const key in property) {
+    propertyValues.push(property[key]);
+  }
+
+  return pool
+    .query(`
+      INSERT INTO properties 
+      (
+      owner_id,
+      title,
+      description,
+      thumnail_photo_url,
+      cover_photo_url,
+      cost_per_night,
+      parking_spaces,
+      number_of_bathrooms,
+      number_of_bedrooms,
+      country,
+      street,
+      city,
+      province,
+      post_code,
+      active
+      )
+      VALUES
+      (
+      $1,
+      $2,
+      $3,
+      $4,
+      $5,
+      $6,
+      $7,
+      $8,
+      $9,
+      $10,
+      $11,
+      $12,
+      $13,
+      $14,
+      $15,
+      );`, [propertyValues])
+    .then((result) => {
+      if (result.rows.length === 0) {
+        return null;
+      }
+      return result.rows;
+    })
+    .catch((err) => {
+      console.log(err.message);
+      return Promise.reject(err);
+    })
+
+  //////////////////////////// Old code
+  // const propertyId = Object.keys(properties).length + 1;
+  // property.id = propertyId;
+  // properties[propertyId] = property;
+  // return Promise.resolve(property);
 };
 
 module.exports = {
