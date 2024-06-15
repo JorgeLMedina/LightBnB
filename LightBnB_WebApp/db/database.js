@@ -70,7 +70,10 @@ const addUser = function (user) {
     .then((result) => {
       return result.rows[0];
     })
-    .catch((err) => { console.log(err.message); })
+    .catch((err) => {
+      console.log(err.message);
+      return Promise.reject(err);
+    })
 };
 
 /// Reservations
@@ -128,26 +131,25 @@ const getAllProperties = (options, limit = 10) => {
   `;
 
   if (options.owner_id) {
-    queryParams.push(`${options.owner_id}`);
+    queryParams.push(options.owner_id);
     queryString += ` AND owner_id = $${queryParams.length}\n`;
   }
-
-  // if (options.minimum_price_per_night) {
-  //   queryParams.push(`${options.minimum_price_per_night}`);
-  //   queryString += ` AND minimum_price_per_night <= $${queryParams[queryParams.length - 1] * 100}`;
-
-  // }
-
-  // if (options.maximum_price_per_night) {
-  //   queryParams.push(`${options.maximum_price_per_night}`);
-  //   queryString += ` AND maximum_price_per_night <= $${queryParams[queryParams.length - 1] * 100}`;
-  // }
 
   if (options.minimum_price_per_night && options.maximum_price_per_night) {
     queryParams.push(options.minimum_price_per_night * 100);
     queryParams.push(options.maximum_price_per_night * 100);
-    queryString += `AND (cost_per_night >= $${queryParams.length - 1
-      } AND cost_per_night <= $${queryParams.length})\n`;
+    queryString += `AND (cost_per_night >= $${queryParams.length - 1} AND cost_per_night <= $${queryParams.length})\n`;
+  }
+
+  if (options.minimum_price_per_night) {
+    queryParams.push(options.minimum_price_per_night * 100);
+    queryString += ` AND cost_per_night >= $${queryParams.length - 1}\n`;
+
+  }
+
+  if (options.maximum_price_per_night) {
+    queryParams.push(options.maximum_price_per_night * 100);
+    queryString += ` AND cost_per_night <= $${queryParams.length - 1}\n`;
   }
 
   if (options.city) {
@@ -160,7 +162,7 @@ const getAllProperties = (options, limit = 10) => {
   `;
 
   if (options.minimum_rating) {
-    queryParams.push(`${options.minimum_rating}`);
+    queryParams.push(options.minimum_rating);
     queryString += ` HAVING avg(rating) >= $${queryParams.length}\n`;
   }
 
@@ -226,7 +228,7 @@ const addProperty = function (property) {
       $12,
       $13,
       $14,
-      $15,
+      $15
       );`, [property.owner_id, property.title, property.description, property.thumnail_photo_url, property.cover_photo_url, property.cost_per_night, property.parking_spaces, property.number_of_bathrooms, property.number_of_bedrooms, property.country, property.street, property.city, property.province, property.post_code, property.active])
     .then((result) => {
       if (result.rows.length === 0) {
