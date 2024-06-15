@@ -134,34 +134,34 @@ const getAllProperties = (options, limit = 10) => {
 
 
   if (options.owner_id) {
-    queryParams.push(`%${options.owner_id}%`);
-    queryString += `WHERE owner_id = ${queryParams.length}`;
+    queryParams.push(`${options.owner_id}`);
+    queryString += `WHERE owner_id = $${queryParams.length}`;
   }
 
   if (options.minimum_price_per_night) {
-    queryParams.push(`%${options.minimum_price_per_night}%`);
+    queryParams.push(`${options.minimum_price_per_night}`);
     if (queryParams.length === 0) {
-      queryString += `WHERE minimum_price_per_night >= ${queryParams.length * 100}`;
+      queryString += `WHERE minimum_price_per_night >= $${queryParams.length * 100}`;
     } else {
-      queryString += `AND minimum_price_per_night <= ${queryParams.length * 100}`
+      queryString += `AND minimum_price_per_night <= $${queryParams.length * 100}`
     }
   }
 
   if (options.maximum_price_per_night) {
-    queryParams.push(`%${options.maximum_price_per_night}%`);
+    queryParams.push(`${options.maximum_price_per_night}`);
     if (queryParams.length === 0) {
-      queryString += `WHERE maximum_price_per_night <= ${queryParams.length * 100}`;
+      queryString += `WHERE maximum_price_per_night <= $${queryParams.length * 100}`;
     } else {
-      queryString += `AND maximum_price_per_night <= ${queryParams.length * 100}`
+      queryString += `AND maximum_price_per_night <= $${queryParams.length * 100}`
     }
   }
 
   if (options.minimum_rating) {
-    queryParams.push(`%${options.minimum_rating}%`);
+    queryParams.push(`${options.minimum_rating}`);
     if (queryParams.length === 0) {
-      queryString += `WHERE minimum_rating >= ${queryParams.length}`;
+      queryString += `WHERE minimum_rating >= $${queryParams.length}`;
     } else {
-      queryString += `AND minimum_rating >= ${queryParams.length}`
+      queryString += `AND minimum_rating >= $${queryParams.length}`
     }
   }
 
@@ -170,7 +170,7 @@ const getAllProperties = (options, limit = 10) => {
     if (queryParams.length === 0) {
       queryString += `WHERE city LIKE $${queryParams.length} `;
     } else {
-      queryString += `AND minimum_price_per_night >= ${queryParams.length}`;
+      queryString += `AND city LIKE $${queryParams.length}`;
     }
   }
 
@@ -204,12 +204,6 @@ const getAllProperties = (options, limit = 10) => {
  * @return {Promise<{}>} A promise to the property.
  */
 const addProperty = function (property) {
-  const propertyValues = [];
-
-  for (const key in property) {
-    propertyValues.push(property[key]);
-  }
-
   return pool
     .query(`
       INSERT INTO properties 
@@ -247,7 +241,7 @@ const addProperty = function (property) {
       $13,
       $14,
       $15,
-      );`, [propertyValues])
+      );`, [property.owner_id, property.title, property.description, property.thumnail_photo_url, property.cover_photo_url, property.cost_per_night, property.parking_spaces, property.number_of_bathrooms, property.number_of_bedrooms, property.country, property.street, property.city, property.province, property.post_code, property.active])
     .then((result) => {
       if (result.rows.length === 0) {
         return null;
