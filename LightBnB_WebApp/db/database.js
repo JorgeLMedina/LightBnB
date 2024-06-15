@@ -141,16 +141,16 @@ const getAllProperties = (options, limit = 10) => {
     queryString += `AND (cost_per_night >= $${queryParams.length - 1} AND cost_per_night <= $${queryParams.length})\n`;
   }
 
-  if (options.minimum_price_per_night) {
-    queryParams.push(options.minimum_price_per_night * 100);
-    queryString += ` AND cost_per_night >= $${queryParams.length - 1}\n`;
+  // if (options.minimum_price_per_night) {
+  //   queryParams.push(options.minimum_price_per_night * 100);
+  //   queryString += ` AND cost_per_night >= $${queryParams.length - 1}\n`;
 
-  }
+  // }
 
-  if (options.maximum_price_per_night) {
-    queryParams.push(options.maximum_price_per_night * 100);
-    queryString += ` AND cost_per_night <= $${queryParams.length - 1}\n`;
-  }
+  // if (options.maximum_price_per_night) {
+  //   queryParams.push(options.maximum_price_per_night * 100);
+  //   queryString += ` AND cost_per_night <= $${queryParams.length - 1}\n`;
+  // }
 
   if (options.city) {
     queryParams.push(`%${options.city}%`);
@@ -202,15 +202,14 @@ const addProperty = function (property) {
       thumnail_photo_url,
       cover_photo_url,
       cost_per_night,
-      parking_spaces,
-      number_of_bathrooms,
-      number_of_bedrooms,
-      country,
       street,
       city,
       province,
       post_code,
-      active
+      country,
+      parking_spaces,
+      number_of_bathrooms,
+      number_of_bedrooms
       )
       VALUES
       (
@@ -229,7 +228,8 @@ const addProperty = function (property) {
       $13,
       $14,
       $15
-      );`, [property.owner_id, property.title, property.description, property.thumnail_photo_url, property.cover_photo_url, property.cost_per_night, property.parking_spaces, property.number_of_bathrooms, property.number_of_bedrooms, property.country, property.street, property.city, property.province, property.post_code, property.active])
+      )
+      RETURNING *;`, [property.owner_id, property.title, property.description, property.thumnail_photo_url, property.cover_photo_url, property.cost_per_night, property.parking_spaces, property.number_of_bathrooms, property.number_of_bedrooms, property.country, property.street, property.city, property.province, property.post_code, property.active])
     .then((result) => {
       if (result.rows.length === 0) {
         return null;
