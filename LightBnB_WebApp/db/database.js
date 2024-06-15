@@ -126,7 +126,7 @@ const getAllProperties = (options, limit = 10) => {
   let queryString = `
   SELECT properties.*, avg(property_reviews.rating) as average_rating
   FROM properties
-  JOIN property_reviews ON properties.id = property_id
+  LEFT JOIN property_reviews ON properties.id = property_id
   WHERE 1=1
   `;
 
@@ -139,18 +139,13 @@ const getAllProperties = (options, limit = 10) => {
     queryParams.push(options.minimum_price_per_night * 100);
     queryParams.push(options.maximum_price_per_night * 100);
     queryString += `AND (cost_per_night >= $${queryParams.length - 1} AND cost_per_night <= $${queryParams.length})\n`;
+  } else if (options.minimum_price_per_night) {
+    queryParams.push(options.minimum_price_per_night * 100);
+    queryString += ` AND cost_per_night >= $${queryParams.length - 1}\n`;
+  } else if (options.maximum_price_per_night) {
+    queryParams.push(options.maximum_price_per_night * 100);
+    queryString += ` AND cost_per_night <= $${queryParams.length - 1}\n`;
   }
-
-  // if (options.minimum_price_per_night) {
-  //   queryParams.push(options.minimum_price_per_night * 100);
-  //   queryString += ` AND cost_per_night >= $${queryParams.length - 1}\n`;
-
-  // }
-
-  // if (options.maximum_price_per_night) {
-  //   queryParams.push(options.maximum_price_per_night * 100);
-  //   queryString += ` AND cost_per_night <= $${queryParams.length - 1}\n`;
-  // }
 
   if (options.city) {
     queryParams.push(`%${options.city}%`);
@@ -163,7 +158,7 @@ const getAllProperties = (options, limit = 10) => {
 
   if (options.minimum_rating) {
     queryParams.push(options.minimum_rating);
-    queryString += ` HAVING avg(rating) >= $${queryParams.length}\n`;
+    queryString += ` HAVING avg(property_reviews.rating) >= $${queryParams.length}\n`;
   }
 
   queryParams.push(limit);
@@ -183,6 +178,7 @@ const getAllProperties = (options, limit = 10) => {
     .then((res) => res.rows)
     .catch((err) => {
       console.log(err.message);
+      return Promise.reject(err);
     });
 };
 
@@ -199,7 +195,7 @@ const addProperty = function (property) {
       owner_id,
       title,
       description,
-      thumnail_photo_url,
+      thumbnail_photo_url,
       cover_photo_url,
       cost_per_night,
       street,
@@ -226,10 +222,9 @@ const addProperty = function (property) {
       $11,
       $12,
       $13,
-      $14,
-      $15
+      $14
       )
-      RETURNING *;`, [property.owner_id, property.title, property.description, property.thumnail_photo_url, property.cover_photo_url, property.cost_per_night, property.parking_spaces, property.number_of_bathrooms, property.number_of_bedrooms, property.country, property.street, property.city, property.province, property.post_code, property.active])
+      RETURNING *;`, [property.owner_id, property.title, property.description, property.thumbnail_photo_url, property.cover_photo_url, property.cost_per_night, property.street, property.city, property.province, property.post_code, property.country, property.parking_spaces, property.number_of_bathrooms, property.number_of_bedrooms])
     .then((result) => {
       if (result.rows.length === 0) {
         return null;
