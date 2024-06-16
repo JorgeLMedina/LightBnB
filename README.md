@@ -4,12 +4,12 @@ A simple multi-page Airbnb clone that uses a server-side Javascript to display t
 
 ## Final Product
 
-!["Home page / non-signed up user"](/docs/01_home.jpg)
-!["Search form"](/docs/02_search.jpg)
-!["Login form"](/docs/03_login.jpg)
-!["Sign up form"](/docs/04_signUp.jpg)
-!["Home page / logged user"](/docs/05_loggedUser.jpg)
-!["Logged user's create listing page "](/docs/06_createListing.jpg)
+!["Home page / non-signed up user"](https://github.com/JorgeLMedina/LightBnB/blob/master/docs/01_home.jpg?raw=true)
+!["Search form"](https://github.com/JorgeLMedina/LightBnB/blob/master/docs/02_search.jpg?raw=true)
+!["Login form"](https://github.com/JorgeLMedina/LightBnB/blob/master/docs/03_login.jpg?raw=true)
+!["Sign up form"](https://github.com/JorgeLMedina/LightBnB/blob/master/docs/04_signUp.jpg?raw=true)
+!["Home page / logged user"](https://github.com/JorgeLMedina/LightBnB/blob/master/docs/05_loggedUser.jpg?raw=true)
+!["Logged user's create listing page "](https://github.com/JorgeLMedina/LightBnB/blob/master/docs/06_createListing.jpg?raw=true)
 
 ## Dependencies
 
